@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_sound_lite/flutter_sound.dart';
+import 'package:flutter_sound/public/flutter_sound_recorder.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 final pathToSaveAudio = DateTime.now().toString()+'_'+'example_audio.aac';
@@ -15,13 +15,13 @@ class SoundRecorder{
     if(status != PermissionStatus.granted){
       throw RecordingPermissionException('Microphone permission need to access Audio !');
     }
-    await _audioRecorder!.openAudioSession();
+    await _audioRecorder!.openRecorder();
     isRecorderInitialised = true;
   }
 
   void dispose() {
     if(!isRecorderInitialised) return;
-    _audioRecorder!.closeAudioSession();
+    _audioRecorder!.closeRecorder();
     _audioRecorder = null;
     isRecorderInitialised = false;
   }

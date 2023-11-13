@@ -7,6 +7,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:uhcd_childreen_project/recorder_screen.dart';
 import 'dart:io';
 import 'package:video_thumbnail/video_thumbnail.dart'as thumb;
+
+import 'mic_recorder_screen.dart';
 void main() {
   runApp(MyApp());
 }
@@ -81,7 +83,7 @@ class _MultipleFilepickerScreenState extends State<MultipleFilepickerScreen> {
         }
       }else{
         /// create custom Audio recorder here
-        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const RecorderScreen()));
+        Navigator.of(context).push(MaterialPageRoute(builder: (context) => MyHomePage()));
       }
     }
   }
