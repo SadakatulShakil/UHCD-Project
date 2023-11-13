@@ -1,9 +1,12 @@
 import 'dart:typed_data';
 
+import 'package:camera/camera.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:uhcd_childreen_project/recorder_screen.dart';
 import 'dart:io';
-import 'package:video_thumbnail/video_thumbnail.dart';
+import 'package:video_thumbnail/video_thumbnail.dart'as thumb;
 void main() {
   runApp(MyApp());
 }
@@ -30,60 +33,89 @@ class _MultipleFilepickerScreenState extends State<MultipleFilepickerScreen> {
   List<File?> _videoList = [];
   List<File?> _audioList = [];
 
-  getMultipleFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      allowMultiple: true,
-      type: FileType.any,
-    );
+  void getFiles(ImageSource imageSource, String usedFor) async {
+    if(usedFor == 'image'){
+      XFile? file = await ImagePicker()
+          .pickImage(source: imageSource, imageQuality: 10);
+      if (file != null) {
+        // Convert XFile to File
+        File newFile = File(file.path);
 
-    if (result != null) {
-      List<File> newFiles = result.paths.map((path) => File(path!)).toList() ?? [];
-      _imageList.addAll(newFiles);
-      setState(() {});
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Please select at least 1 file'),
-      ));
+        // Add the captured image to the list
+        _imageList.add(newFile);
+
+        // Update the UI
+        setState(() {});
+      }
+    }
+    else if(usedFor == 'video'){
+      XFile? file = await ImagePicker()
+          .pickVideo(source: imageSource,);
+      if (file != null) {
+        // Convert XFile to File
+        File newFile = File(file.path);
+
+        // Add the captured image to the list
+        _videoList.add(newFile);
+
+        // Update the UI
+        setState(() {});
+      }
+    }
+    else{
+      if(imageSource == ImageSource.gallery){
+        FilePickerResult? result = await FilePicker.platform.pickFiles(
+          allowMultiple: true,
+          type: FileType.audio,
+        );
+
+        if (result != null) {
+          List<File> newFiles = result.paths.map((path) => File(path!)).toList() ?? [];
+          _audioList.addAll(newFiles);
+          setState(() {});
+        } else {
+          // You can show snackbar or fluttertoast here like this to show warning to user
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Please select atleast 1 file'),
+          ));
+        }
+      }else{
+        /// create custom Audio recorder here
+        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const RecorderScreen()));
+      }
     }
   }
 
-  getMultipleFile1() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      allowMultiple: true,
-      type: FileType.any,
-      // You want to pass different argument
-      // in these 2 property in above function
+  Future<void> showFileDialog(String title, String usedFor) {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Row(
+           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  getFiles(ImageSource.camera, usedFor);
+                  setState(() {});
+                },
+                child: usedFor == 'audio'?Text('Recorder'):Text('Camera'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  getFiles(ImageSource.gallery, usedFor);
+                  setState(() {});
+                },
+                child: Text('Gallery'),
+              ),
+            ],
+          ),
+        );
+      },
     );
-
-    if (result != null) {
-      List<File> newFiles = result.paths.map((path) => File(path!)).toList() ?? [];
-     _videoList.addAll(newFiles);
-      setState(() {});
-    } else {
-      // You can show snackbar or fluttertoast here like this to show warning to user
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Please select atleast 1 file'),
-      ));
-    }
-  }
-  getMultipleFile2() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      allowMultiple: true,
-      type: FileType.any,
-      // You want to pass different argument
-      // in these 2 property in above function
-    );
-
-    if (result != null) {
-      List<File> newFiles = result.paths.map((path) => File(path!)).toList() ?? [];
-      _audioList.addAll(newFiles);
-      setState(() {});
-    } else {
-      // You can show snackbar or fluttertoast here like this to show warning to user
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Please select atleast 1 file'),
-      ));
-    }
   }
 
 // Variable for showing multiple file
@@ -99,7 +131,8 @@ class _MultipleFilepickerScreenState extends State<MultipleFilepickerScreen> {
                 padding: const EdgeInsets.only(left: 8.0, top: 8.0),
                 child: OutlinedButton(
                   onPressed: () async {
-                    getMultipleFile();
+                    showFileDialog('Get Image From', 'image');
+                    //getMultipleFile();
                   },
                   child: Text('Choose Image'),
                 ),
@@ -152,7 +185,8 @@ class _MultipleFilepickerScreenState extends State<MultipleFilepickerScreen> {
                 padding: const EdgeInsets.only(left: 8.0, top: 8.0),
                 child: OutlinedButton(
                   onPressed: () async {
-                    getMultipleFile1();
+                    //getMultipleFile1();
+                    showFileDialog('Get Video from', 'video');
                   },
                   child: Text('Choose Video'),
                 ),
@@ -173,9 +207,9 @@ class _MultipleFilepickerScreenState extends State<MultipleFilepickerScreen> {
                       child: Stack(
                         children: <Widget>[
                           FutureBuilder(
-                            future: VideoThumbnail.thumbnailData(
+                            future: thumb.VideoThumbnail.thumbnailData(
                               video: _videoList[index]!.path,
-                              imageFormat: ImageFormat.PNG,
+                              imageFormat: thumb.ImageFormat.PNG,
                               quality: 30,
                             ),
                             builder: (context, snapshot) {
@@ -222,7 +256,8 @@ class _MultipleFilepickerScreenState extends State<MultipleFilepickerScreen> {
                 padding: const EdgeInsets.only(left: 8.0, top: 8.0),
                 child: OutlinedButton(
                   onPressed: () async {
-                    getMultipleFile2();
+                    //getMultipleFile2();
+                    showFileDialog('Get Audio from', 'audio');
                   },
                   child: Text('Choose Audio'),
                 ),
@@ -268,6 +303,7 @@ class _MultipleFilepickerScreenState extends State<MultipleFilepickerScreen> {
                     );
                   }),
             ),
+
           ],
         ),
       ),
