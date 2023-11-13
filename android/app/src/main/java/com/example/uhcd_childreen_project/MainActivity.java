@@ -1,4 +1,4 @@
-package com.example.multiple_image_file;
+package com.example.uhcd_childreen_project;
 
 import io.flutter.embedding.android.FlutterActivity;
 

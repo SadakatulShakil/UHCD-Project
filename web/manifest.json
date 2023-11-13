@@ -1,6 +1,6 @@
 {
-    "name": "multiple_image_file",
-    "short_name": "multiple_image_file",
+    "name": "uhcd_childreen_project",
+    "short_name": "uhcd_childreen_project",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

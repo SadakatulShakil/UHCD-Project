@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "multiple_image_file" "\0"
+            VALUE "FileDescription", "uhcd_childreen_project" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "multiple_image_file" "\0"
+            VALUE "InternalName", "uhcd_childreen_project" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2023 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "multiple_image_file.exe" "\0"
-            VALUE "ProductName", "multiple_image_file" "\0"
+            VALUE "OriginalFilename", "uhcd_childreen_project.exe" "\0"
+            VALUE "ProductName", "uhcd_childreen_project" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
