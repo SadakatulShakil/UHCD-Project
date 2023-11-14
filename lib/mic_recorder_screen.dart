@@ -1,7 +1,3 @@
-// Add this to your pubspec.yaml file:
-// dependencies:
-//   flutter_sound: ^10.1.0
-
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_sound/flutter_sound.dart';
@@ -24,14 +20,10 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    getPemission();
     _flutterSoundRecorder = FlutterSoundRecorder();
     _flutterSoundPlayer = FlutterSoundPlayer();
     _initializeRecorder();
     _loadAudioFiles();
-  }
-  void getPemission() {
-
   }
 
   // Add this method to handle recorder initialization
@@ -47,17 +39,6 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void getDirectory() async {
-    directory = (await getExternalStorageDirectory())!; // For Android, use getExternalStorageDirectory
-    // For iOS, you can use getApplicationDocumentsDirectory or getApplicationSupportDirectory
-
-    if (directory == null) {
-      print("Error getting directory");
-    } else {
-      print("Directory path: ${directory.path}");
-    }
-  }
-
   _loadAudioFiles() async {
     Directory directory = Directory('/storage/emulated/0/Music/Recordings/custom'); // Replace with your actual path
     List<FileSystemEntity> files = directory.listSync();
@@ -70,8 +51,12 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   _startRecording() async {
+    String last_path = DateTime.now().toString();
+    String last_path_ex = last_path.replaceAll('-', '')
+        .replaceAll(':', '').replaceAll('.', '').replaceAll(' ', '')+'.wav';
+    print('path: '+last_path_ex);
     await _flutterSoundRecorder.startRecorder(
-      toFile: '/storage/emulated/0/Music/Recordings/custom/recording.wav',
+      toFile: '/storage/emulated/0/Music/Recordings/custom/$last_path_ex',
     );
     setState(() {
       isRecording = true;

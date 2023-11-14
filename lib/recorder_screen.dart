@@ -109,7 +109,7 @@ class _RecorderScreenState extends State<RecorderScreen>{
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Visibility(
-                  visible: visibleBool?false:true,
+                  visible: visibleBool?true:false,
                   child: GestureDetector(
                     onTap: (){
                       _restartTimer();
@@ -118,7 +118,7 @@ class _RecorderScreenState extends State<RecorderScreen>{
                 ),
                 buildStart(),
                 Visibility(
-                  visible: visibleBool?false:true,
+                  visible: visibleBool?true:false,
                   child: GestureDetector(
                     onTap: (){
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
