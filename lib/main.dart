@@ -1,18 +1,16 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:camera/camera.dart';
+import 'package:audioplayers/audioplayers.dart' as mp3player;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sound/public/flutter_sound_player.dart';
 import 'package:flutter_sound/public/flutter_sound_recorder.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:uhcd_childreen_project/recorder_screen.dart';
-import 'dart:io';
+import 'package:uhcd_childreen_project/video_widget.dart';
 import 'package:video_thumbnail/video_thumbnail.dart'as thumb;
-
-import 'mic_recorder_screen.dart';
 void main() {
   runApp(MyApp());
 }
@@ -38,6 +36,7 @@ class _MultipleFilepickerScreenState extends State<MultipleFilepickerScreen> {
   List<File?> _imageList = [];
   List<File?> _videoList = [];
   List<File?> _audioList = [];
+  mp3player.AudioPlayer _audioPlayer = mp3player.AudioPlayer();
   late Timer _timer;
   int _seconds = 0;
   String _currentRecordingFolder = '';
@@ -169,6 +168,9 @@ class _MultipleFilepickerScreenState extends State<MultipleFilepickerScreen> {
   //   });
   //   _startTimer();
   // }
+  void _playAudio(String filePath) {
+    _audioPlayer.play(mp3player.UrlSource(filePath));
+  }
 
   Future<void> showFileDialog(String title, String usedFor) {
     return showDialog(
@@ -267,11 +269,41 @@ class _MultipleFilepickerScreenState extends State<MultipleFilepickerScreen> {
                         clipBehavior: Clip.antiAlias,
                         child: Stack(
                           children: <Widget>[
-                            Image.file(
-                              File(_imageList[index]!.path),
-                              width: 200,
-                              height: 200,
-                              fit: BoxFit.cover,
+                            GestureDetector(
+                              onTap: () {
+                                // Preview image as an alert dialog and fade the main page
+                                Navigator.of(context).push(PageRouteBuilder(
+                                  opaque: false,
+                                  pageBuilder: (BuildContext context, _, __) {
+                                    return Material(
+                                      color: Colors.black.withOpacity(0.8),
+                                      child: Center(
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            Navigator.pop(context);
+                                          },
+                                          child: Hero(
+                                            tag: 'imageHero$index',
+                                            child: Image.file(
+                                              File(_imageList[index]!.path),
+                                              fit: BoxFit.contain,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ));
+                              },
+                              child: Hero(
+                                tag: 'imageHero$index',
+                                child: Image.file(
+                                  File(_imageList[index]!.path),
+                                  width: 200,
+                                  height: 200,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
                             ),
                             Positioned(
                               right: -2,
@@ -292,6 +324,7 @@ class _MultipleFilepickerScreenState extends State<MultipleFilepickerScreen> {
                           ],
                         ),
                       ),
+
                     );
                   }),
             ),
@@ -322,26 +355,53 @@ class _MultipleFilepickerScreenState extends State<MultipleFilepickerScreen> {
                       clipBehavior: Clip.antiAlias,
                       child: Stack(
                         children: <Widget>[
-                          FutureBuilder(
-                            future: thumb.VideoThumbnail.thumbnailData(
-                              video: _videoList[index]!.path,
-                              imageFormat: thumb.ImageFormat.PNG,
-                              quality: 30,
-                            ),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState == ConnectionState.done) {
-                                return Image.memory(
-                                  snapshot.data as Uint8List,
-                                  width: 300,
-                                  height: 300,
-                                  fit: BoxFit.cover,
-                                );
-                              } else {
-                                return Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                              }
+                          InkWell(
+                            onTap: () {
+                              // Preview video as an alert dialog and fade the main page
+                              Navigator.of(context).push(PageRouteBuilder(
+                                opaque: false,
+                                pageBuilder: (BuildContext context, _, __) {
+                                  return Material(
+                                    color: Colors.black,
+                                    child: Center(
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: Hero(
+                                          tag: 'videoHero$index',
+                                          child: VideoPlayerWidget(videoPath: _videoList[index]!.path),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ));
                             },
+                            child: Hero(
+                              tag: 'videoHero$index',
+                              child: FutureBuilder(
+                                future: thumb.VideoThumbnail.thumbnailData(
+                                  video: _videoList[index]!.path,
+                                  imageFormat: thumb.ImageFormat.PNG,
+                                  quality: 30,
+                                ),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState == ConnectionState.done) {
+                                    return Image.memory(
+                                      snapshot.data as Uint8List,
+                                      width: 300,
+                                      height: 300,
+                                      fit: BoxFit.cover,
+                                    );
+                                  } else {
+                                    return Center(
+                                      child: CircularProgressIndicator(),
+                                    );
+                                  }
+                                },
+                              ),
+                            ),
                           ),
                           Positioned(
                             right: -2,
@@ -371,9 +431,9 @@ class _MultipleFilepickerScreenState extends State<MultipleFilepickerScreen> {
               child: Padding(
                 padding: const EdgeInsets.only(left: 8.0, top: 8.0),
                 child: OutlinedButton(
-                  onPressed: () async {
+                  onPressed: (){
                     //getMultipleFile2();
-                    showFileDialog('Get Audio from', 'audio');
+                    //showFileDialog('Get Audio from', 'audio');
                   },
                   child: Text('Audio section :'),
                 ),
@@ -392,7 +452,7 @@ class _MultipleFilepickerScreenState extends State<MultipleFilepickerScreen> {
                 ],
               ),
             ),
-           Row(
+            Row(
              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
              children: [
                ElevatedButton(
@@ -429,10 +489,32 @@ class _MultipleFilepickerScreenState extends State<MultipleFilepickerScreen> {
                         clipBehavior: Clip.antiAlias,
                         child: Stack(
                           children: <Widget>[
-                            Image.asset('assets/images/mp3.png',
+                            Image.asset(
+                              'assets/images/mp3.png',
                               width: 200,
                               height: 200,
                               fit: BoxFit.cover,
+                            ),
+                            Positioned(
+                              right: 12,
+                              top: 12,
+                              child: InkWell(
+                                child: Icon(
+                                  _audioPlayer.state == mp3player.PlayerState.playing
+                                      ? Icons.pause
+                                      : Icons.play_arrow,
+                                  size: 40,
+                                  color: Colors.green,
+                                ),
+                                onTap: () {
+                                  if (_audioPlayer.state == mp3player.PlayerState.playing) {
+                                    _audioPlayer.pause();
+                                  } else {
+                                    _playAudio(_audioList[index]!.path);
+
+                                  }
+                                },
+                              ),
                             ),
                             Positioned(
                               right: -2,
@@ -456,7 +538,6 @@ class _MultipleFilepickerScreenState extends State<MultipleFilepickerScreen> {
                     );
                   }),
             ),
-
           ],
         ),
       ),
