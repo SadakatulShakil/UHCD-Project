@@ -9,6 +9,7 @@ import 'package:flutter_sound/public/flutter_sound_player.dart';
 import 'package:flutter_sound/public/flutter_sound_recorder.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:uhcd_childreen_project/Pages&Stepper/multipage_stepper_screen.dart';
 import 'package:uhcd_childreen_project/video_widget.dart';
 import 'package:video_thumbnail/video_thumbnail.dart'as thumb;
 void main() {
@@ -33,6 +34,8 @@ class MultipleFilepickerScreen extends StatefulWidget {
 }
 
 class _MultipleFilepickerScreenState extends State<MultipleFilepickerScreen> {
+  bool showSnackbar = false;
+  late Timer preodicTimer;
   List<File?> _imageList = [];
   List<File?> _videoList = [];
   List<File?> _audioList = [];
@@ -229,11 +232,29 @@ class _MultipleFilepickerScreenState extends State<MultipleFilepickerScreen> {
   }
 
 
+  void startTimer() {
+    const duration = Duration(seconds: 10);
+    preodicTimer = Timer.periodic(duration, (Timer t) {
+      if (showSnackbar) {
+        // Show your Snackbar here
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Timer reached 5 minutes!'),
+          ),
+        );
+      }
+    });
+  }
+
+  void stopTimer() {
+    preodicTimer.cancel();
+  }
 
   @override
   void dispose() {
     _flutterSoundRecorder.closeRecorder();
     _flutterSoundPlayer.closePlayer();
+    preodicTimer.cancel();
     super.dispose();
   }
 // Variable for showing multiple file
@@ -538,8 +559,54 @@ class _MultipleFilepickerScreenState extends State<MultipleFilepickerScreen> {
                     );
                   }),
             ),
+
+            Padding(
+              padding: const EdgeInsets.only(bottom: 18.0, left: 8),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: ElevatedButton(
+                  onPressed: (){
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            SignUpWizard(),
+                      ),
+                    );
+                  },
+                  child: Text('Stepper Wizard'),
+                ),
+              ),
+            ),
           ],
         ),
+        floatingActionButton: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            FloatingActionButton(
+              onPressed: () {
+                setState(() {
+                  showSnackbar = true;
+                });
+                startTimer();
+
+                print('Floating button pressed!');
+              },
+              child: Icon(Icons.alarm_add),
+            ),
+            SizedBox(height: 8,),
+            FloatingActionButton(
+              onPressed: () {
+                setState(() {
+                  showSnackbar = false;
+                });
+                stopTimer();
+                print('Floating button pressed!');
+              },
+              child: Icon(Icons.alarm_off),
+            ),
+          ],
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat, // Adjust as needed
       ),
     );
   }
